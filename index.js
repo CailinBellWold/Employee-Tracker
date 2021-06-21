@@ -1,4 +1,6 @@
-//TO DO: Figure out how to push to the screen the employee/role basic info, but return into the variable the ID for those items.
+// TO DO: Figure out how to push to the screen the employee/role basic info, but return into the variable the ID for those items.
+// Validate Employees, Roles and Departments against existing.
+// Validate salary as a number
 
 // NPM Packages
 const mysql = require('mysql');
@@ -21,6 +23,14 @@ const roleArr = () => {
   const roleArr = [];
   results.forEach(({ title }) => {
     choiceArray.push(title);
+  });
+  return roleArr;
+},
+
+const departmentArr = () => {
+  const departmentArr = [];
+  results.forEach(({ department_name }) => {
+    choiceArray.push(department_name);
   });
   return roleArr;
 },
@@ -164,9 +174,104 @@ const addEmployee = () => {
   })
 };
 
+const addRole = () => {
+  return inquirer
+    .prompt([
+    {
+      name: 'title',  
+      type: 'input',
+      message: 'Input new ROLE (title).',
+      validate: title => {
+        if (title) {
+          return true;
+          } else {
+            console.log (error + noInfoEntered + `Please enter a new ROLE (title).`);
+            return false; 
+          }
+      },
+    },
+    {
+      name: 'salary',  
+      type: 'input',
+      message: ({ title }) => `Input the ${title}\'s SALARY.`,
+      validate: salary => {
+        if (salary) {
+          return true;
+        } else {
+          ({ title }) => console.log (error + noInfoEntered + `Please enter the ${title}\'s SALARY.`);
+          return false; 
+        }
+      },
+    },
+    {
+      name: 'department',  
+      type: 'input',
+      message: ({ title }) => `Input ${title}\'s DEPARTMENT by scrolling through the menu below.`,
+      choices: departmentArr()
+    },
+  ])
+  .then(answers => {
+    const departmentID = departmentArr().indexOf(val.department) +1
+    connection.query(
+      'INSERT INTO role SET ?',
+      {
+        title: answers.title,
+        salary: answers.salary,
+        department_id: departmentID
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} The Role has been added.\n`);
+      }
+    );
+    connection.end;
+  })
+};
+
+const addDepartment = () => {
+  return inquirer
+    .prompt([
+    {
+      name: 'department_name',  
+      type: 'input',
+      message: 'Input new DEPARTMENT NAME.',
+      validate: department_name => {
+        if (department_name) {
+          return true;
+          } else {
+            console.log (error + noInfoEntered + `Please enter a new DEPARTMENT NAME.`);
+            return false; 
+          }
+      },
+    },
+  ])
+  .then(answers => {
+    connection.query(
+      'INSERT INTO department SET ?',
+      {
+        department_name: answers.department_name,
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} The Department has been added.\n`);
+      }
+    );
+    connection.end;
+  })
+};
+
 // READ (View)
 const viewEmployees = () => {
   connection.query('SELECT * FROM employees', (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    connection.end;
+  }),
+  startPrompts()
+}
+
+const viewRoles = () => {
+  connection.query('SELECT * FROM roles', (err, res) => {
     if (err) throw err;
     console.table(res);
     connection.end;
