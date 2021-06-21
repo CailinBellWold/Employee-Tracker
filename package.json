@@ -1,0 +1,25 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "Employee Tracker",
+  "main": "index.js",
+  "scripts": {
+    "test": "Test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CailinBellWold/Employee-Tracker.git"
+  },
+  "keywords": [
+    "Employee",
+    "Tracker",
+    "mysql",
+    "inquirer"
+  ],
+  "author": "Cailin Bell Wold",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CailinBellWold/Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/CailinBellWold/Employee-Tracker#readme"
+}
