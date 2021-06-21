@@ -25,7 +25,7 @@ const roleArr = () => {
     choiceArray.push(title);
   });
   return roleArr;
-},
+};
 
 const departmentArr = () => {
   const departmentArr = [];
@@ -33,7 +33,7 @@ const departmentArr = () => {
     choiceArray.push(department_name);
   });
   return roleArr;
-},
+};
 
 // Colorized Fonts and Other Default Language
 const welcomeMsg = `* * * * WELCOME TO EMPLOYEE TRACKER. * * * *\n`.underline.green;
@@ -232,11 +232,11 @@ const addDepartment = () => {
   return inquirer
     .prompt([
     {
-      name: 'department_name',  
+      name: 'departmentName',  
       type: 'input',
       message: 'Input new DEPARTMENT NAME.',
-      validate: department_name => {
-        if (department_name) {
+      validate: departmentName => {
+        if (departmentName) {
           return true;
           } else {
             console.log (error + noInfoEntered + `Please enter a new DEPARTMENT NAME.`);
@@ -249,7 +249,7 @@ const addDepartment = () => {
     connection.query(
       'INSERT INTO department SET ?',
       {
-        department_name: answers.department_name,
+        department_name: answers.departmentName,
       },
       (err, res) => {
         if (err) throw err;
@@ -327,3 +327,9 @@ const updateEmployeeRole = () => {
 };
 
 // DELETE (currently empty)
+
+// Function to Initialize App
+const init = () => welcome()
+
+// Initialize App
+init();
