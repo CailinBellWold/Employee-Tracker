@@ -5,34 +5,40 @@
 // NPM Packages
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const cTable = require('console.table')
 const colors = require('colors');
 
 // Dependencies
-const createConnection = require('./config/connection');
+const connection = require('./config/connection');
 
 // Arrays
 const employeeArr = () => {
-  const employeeArr = [];
-  results.forEach(({ first_name }) => {
-    choiceArray.push(first_name + last_name);
-  });
-  return employeeArr;
+  connection.query('SELECT * from employee', function(err, res) {
+    if (err) throw err;
+    const employeeArr = [];
+    res.forEach(({ first_name }) => employeeArr.push(first_name + last_name));
+    connection.end();
+    return employeeArr;
+  })
 };
 
 const roleArr = () => {
-  const roleArr = [];
-  results.forEach(({ title }) => {
-    choiceArray.push(title);
-  });
+  connection.query('SELECT * FROM role', function(err, res) {
+    if (err) throw err;
+    const roleArr = [];
+    res.forEach(({ title }) => roleArr.push(title));
+  connection.end();
   return roleArr;
+  })
 };
 
 const departmentArr = () => {
-  const departmentArr = [];
-  results.forEach(({ department_name }) => {
-    choiceArray.push(department_name);
-  });
-  return roleArr;
+  connection.query('SELECT * from department', function(err, res) {
+    if (err) throw err;
+    const departmentArr = [];
+    res.forEach(({ department_name }) => departmentArr.push(department_name));
+  return departmentArr;
+  })
 };
 
 // Colorized Fonts and Other Default Language
@@ -42,36 +48,37 @@ const noInfoEntered = `No information was entered.`;
 
 // Welcome and Instructions
 const welcome = () => {
-  return inquirer.prompt([
-      {
-          type: 'input',
-          name: 'welcome',
-          message: welcomeMsg + '\nYou will have the opportunity to access and edit information about employees, roles and departments. \nLet\'s begin. Press ENTER to continue.\n',
-      },
-      
+  return inquirer
+  .prompt([
+    {
+      type: 'input',
+      name: 'welcome',
+      message: welcomeMsg + '\nYou will have the opportunity to access and edit information about employees, roles and departments. \nLet\'s begin. Press ENTER to continue.\n',
+    },
   ])
   .then(startPrompts)
 };
 
 const startPrompts = () => {
-  inquirer
-    .prompt({
-      name: 'action',
-      type: 'rawlist',
-      message: 'What would you like to do?',
-      choices: [
-        'EMPLOYEES: View all',
-        'EMPLOYEES: Add',
-        'EMPLOYEES: Update role',
+  return inquirer
+    .prompt([
+      {
+        name: 'action',
+        type: 'rawlist',
+        message: 'What would you like to do?',
+        choices: [
+          'EMPLOYEES: View all',
+          'EMPLOYEES: Add',
+          'EMPLOYEES: Update role',
 
-        'ROLES: View all',
-        'ROLES: Add',
+          'ROLES: View all',
+          'ROLES: Add',
 
-        'DEPARTMENTS: View all',
-        'DEPARTMENTS: Add',
-      ],
-    })
-
+          'DEPARTMENTS: View all',
+          'DEPARTMENTS: Add',
+        ],
+      },
+    ])
     .then((answer) => {
       switch (answer.action) {
         case 'EMPLOYEES: View all':
@@ -114,7 +121,7 @@ const startPrompts = () => {
 // CREATE (Add)
 const addEmployee = () => {
   return inquirer
-    .prompt([
+  .prompt([
     {
       name: 'first_name',  
       type: 'input',
@@ -154,20 +161,21 @@ const addEmployee = () => {
       choices: employeeArr()
     },
   ])
-  .then(answers => {
-    const roleID = roleArr().indexOf(val.role) +1
-    const managerID = employeeArr().indexOf(val.employee) + 1
-    connection.query(
-      'INSERT INTO employees SET ?',
+  .then((answers) => {
+    let roleID = roleArr().indexOf(val.role) +1
+    let managerID = employeeArr().indexOf(val.employee) + 1
+    let query = 'INSERT INTO employees SET ?';
+    connection.query(query,
       {
         first_name: answers.first_name,
         last_name: answers.last_name,
-        manager_id: managerID,
-        role_id: roleID
+        role_id: roleID,
+        manager_id: managerID
       },
       (err, res) => {
         if (err) throw err;
-        console.log(`${res.affectedRows} The Employee has been added.\n`);
+        console.log(`${answer.first_name} ${answer.last_name} was successfully added. \n`);
+        startPrompts();
       }
     );
     connection.end;
@@ -176,7 +184,7 @@ const addEmployee = () => {
 
 const addRole = () => {
   return inquirer
-    .prompt([
+  .prompt([
     {
       name: 'title',  
       type: 'input',
@@ -210,8 +218,9 @@ const addRole = () => {
       choices: departmentArr()
     },
   ])
-  .then(answers => {
-    const departmentID = departmentArr().indexOf(val.department) +1
+  .then((answers) => {
+    let departmentID = departmentArr().indexOf(val.department) +1
+    let query = 
     connection.query(
       'INSERT INTO role SET ?',
       {
@@ -222,6 +231,7 @@ const addRole = () => {
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} The Role has been added.\n`);
+        startPrompts();
       }
     );
     connection.end;
@@ -245,46 +255,58 @@ const addDepartment = () => {
       },
     },
   ])
-  .then(answers => {
-    connection.query(
-      'INSERT INTO department SET ?',
+  .then((answers) => {
+    const query = 'INSERT INTO department SET ?';
+    connection.query(query, [
       {
         department_name: answers.departmentName,
       },
-      (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} The Department has been added.\n`);
-      }
+    ],
+    (err, res) => {
+      if (err) throw err;
+    }
+    console.log(`${res.affectedRows} The Department has been added.\n`)
     );
     connection.end;
-  })
+  }
 };
 
 // READ (View)
-const viewEmployees = () => {
-  connection.query('SELECT * FROM employees', (err, res) => {
+function viewEmployees() {
+  let query = `SELECT employee.first_name, employee.last_name, role.title, role.salary, department.department_name `;
+  query += `CONCAT (e.first_name, ' ', e.last_name) AS Manager `
+  query += `FROM employee `
+  query += `INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id `;
+  query += `LEFT JOIN employee e ON employee.manager_id = e.id `
+  query += `ORDER BY last_name ASC`;
+  connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     connection.end;
-  }),
+  })
   startPrompts()
 }
 
 const viewRoles = () => {
-  connection.query('SELECT * FROM roles', (err, res) => {
+  let query = `SELECT * FROM roles`;
+  query += `INNER JOIN department ON role.department_id = department.id`;
+  query += `ORDER BY title`;
+  connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     connection.end;
-  }),
+  })
   startPrompts()
 }
 
 const viewDepartments = () => {
-  connection.query('SELECT * FROM departments', (err, res) => {
+  let query = `SELECT * FROM departments `;
+  query += `ORDER BY department_name`;
+  connection.query(query, (err, res) => {
     if (err) throw err;
     console.table(res);
     connection.end;
-  }),
+  })
   startPrompts()
 }
 

@@ -34,6 +34,7 @@ This exercise provided my first experience with building an Express.js server, w
 - JavaScript
 - Node.js
 - [NPM Express.js Package](https://www.npmjs.com/package/express)
+- [NPM Console.Table Package](https://www.npmjs.com/package/console.table)
 - [NPM FS Package](https://www.npmjs.com/package/fs)
 - [NPM Path Package](https://www.npmjs.com/package/path)
 - [NPM Router Package](https://www.npmjs.com/package/router)
