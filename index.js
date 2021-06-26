@@ -264,7 +264,7 @@ const addDepartment = () => {
     ],
     (err, res) => {
       if (err) throw err;
-    }
+    },
     console.log(`${res.affectedRows} The Department has been added.\n`)
     );
     connection.end;
