@@ -268,7 +268,7 @@ const addDepartment = () => {
     console.log(`${res.affectedRows} The Department has been added.\n`)
     );
     connection.end;
-  }
+  })
 };
 
 // READ (View)
