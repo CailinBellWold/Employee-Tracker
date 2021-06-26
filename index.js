@@ -13,32 +13,30 @@ const connection = require('./config/connection');
 
 // Arrays
 const employeeArr = () => {
+  const employees = [];
   connection.query('SELECT * from employee', function(err, res) {
     if (err) throw err;
-    const employeeArr = [];
-    res.forEach(({ first_name }) => employeeArr.push(first_name + last_name));
-    connection.end();
-    return employeeArr;
+    res.forEach(({ first_name }) => employees.push(first_name + last_name));
   })
+  return employees;
 };
 
 const roleArr = () => {
+  const roles = [];
   connection.query('SELECT * FROM role', function(err, res) {
     if (err) throw err;
-    const roleArr = [];
-    res.forEach(({ title }) => roleArr.push(title));
-  connection.end();
-  return roleArr;
+    res.forEach(({ title }) => roles.push(title));
   })
+  return roles;
 };
 
 const departmentArr = () => {
+  const departments = [];
   connection.query('SELECT * from department', function(err, res) {
     if (err) throw err;
-    const departmentArr = [];
-    res.forEach(({ department_name }) => departmentArr.push(department_name));
-  return departmentArr;
+    res.forEach(({ department_name }) => departments.push(department_name));
   })
+  return departments;
 };
 
 // Colorized Fonts and Other Default Language
@@ -59,8 +57,8 @@ const welcome = () => {
   .then(startPrompts)
 };
 
-const startPrompts = () => {
-  return inquirer
+const startPrompts = async () => {
+  return await inquirer
     .prompt([
       {
         name: 'action',
@@ -119,8 +117,8 @@ const startPrompts = () => {
 // CRUD Functions
 
 // CREATE (Add)
-const addEmployee = () => {
-  return inquirer
+const addEmployee = async() => {
+  return await inquirer
   .prompt([
     {
       name: 'first_name',  
@@ -150,14 +148,14 @@ const addEmployee = () => {
     },
     {
       name: 'role',  
-      type: 'input',
-      message: ({ first_name, last_name }) => `Input ${first_name + last_name}\'s ROLE by scrolling through the menu below.`,
+      type: 'list',
+      message: ({ first_name, last_name }) => `Input ${first_name +' ' + last_name}\'s ROLE by scrolling through the menu below.`,
       choices: roleArr()
     },
     {
       name: 'manager',  
-      type: 'input',
-      message: ({ first_name, last_name }) => `Input ${first_name + last_name}\'s MANAGER by scrolling through the menu below.`,
+      type: 'list',
+      message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s MANAGER by scrolling through the menu below.`,
       choices: employeeArr()
     },
   ])
@@ -178,12 +176,12 @@ const addEmployee = () => {
         startPrompts();
       }
     );
-    connection.end;
+    // connection.end;
   })
 };
 
-const addRole = () => {
-  return inquirer
+const addRole = async() => {
+  return await inquirer
   .prompt([
     {
       name: 'title',  
@@ -220,9 +218,8 @@ const addRole = () => {
   ])
   .then((answers) => {
     let departmentID = departmentArr().indexOf(val.department) +1
-    let query = 
-    connection.query(
-      'INSERT INTO role SET ?',
+    let query = 'INSERT INTO role SET ?'
+    connection.query(query,
       {
         title: answers.title,
         salary: answers.salary,
@@ -238,8 +235,8 @@ const addRole = () => {
   })
 };
 
-const addDepartment = () => {
-  return inquirer
+const addDepartment = async() => {
+  return await inquirer
     .prompt([
     {
       name: 'departmentName',  
@@ -311,8 +308,8 @@ const viewDepartments = () => {
 }
 
 // UPDATE 
-const updateEmployeeRole = () => {
-  return inquirer
+const updateEmployeeRole = async () => {
+  return await inquirer
     .prompt([
       {
         name: 'employee',  

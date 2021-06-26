@@ -20,7 +20,7 @@ INSERT INTO role (id, title, salary, department_id)
 VALUES (2, 'Director of Operations', 150000, 1);
 
 INSERT INTO role (id, title, salary, department_id)
-VALUES (3, 'Director of Finance & Administration', 150000, 2);
+VALUES (3, 'Director of F&A', 150000, 2);
 
 INSERT INTO role (id, title, salary, department_id)
 VALUES (4, 'Director of Development', 150000, 3);
