@@ -10,13 +10,14 @@ const colors = require('colors');
 
 // Dependencies
 const connection = require('./config/connection');
+const { connect } = require('./config/connection');
 
 // Arrays
 const employeeArr = () => {
   const employees = [];
   connection.query('SELECT * from employee', function(err, res) {
     if (err) throw err;
-    res.forEach(({ first_name }) => employees.push(first_name + last_name));
+    res.forEach(({ id }) => employees.push(first_name + last_name));
   })
   return employees;
 };
@@ -149,39 +150,69 @@ const addEmployee = async() => {
     {
       name: 'role',  
       type: 'list',
-      message: ({ first_name, last_name }) => `Input ${first_name +' ' + last_name}\'s ROLE by scrolling through the menu below.`,
+      message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s ROLE by scrolling through the menu below.`,
       choices: roleArr()
     },
-    {
-      name: 'manager',  
-      type: 'list',
-      message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s MANAGER by scrolling through the menu below.`,
-      choices: employeeArr()
-    },
+    // {
+    //   name: 'manager',  
+    //   type: 'list',
+    //   message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s MANAGER by scrolling through the menu below.`,
+    //   choices: employeeArr()
+    // },
   ])
   .then((answers) => {
-    let roleID = roleArr().indexOf(val.role) +1
-    let managerID = employeeArr().indexOf(val.employee) + 1
-    let query = 'INSERT INTO employees SET ?';
-    connection.query(query,
-      {
-        first_name: answers.first_name,
-        last_name: answers.last_name,
-        role_id: roleID,
-        manager_id: managerID
-      },
-      (err, res) => {
-        if (err) throw err;
-        console.log(`${answer.first_name} ${answer.last_name} was successfully added. \n`);
-        startPrompts();
-      }
-    );
+    let roleTitle = answers.role;
+    let roleID;
+    const findRoleID = () => {
+      const query = connection.query(
+        'SELECT * FROM role WHERE title=?',
+        [`${roleTitle}`],
+        (err, res) => {
+          if (err) throw err;
+          res.forEach(({ id }) => {
+            roleID = id;
+          });
+        }
+      );
+    };
+      findRoleID();
+
+    // let managerName = answers.manager;
+    // let managerID;
+    // const findManagerID = () => {
+    //   const query = connection.query(
+    //     'SELECT * FROM employee WHERE first_name=? & last_name=?',
+    //     [`${managerName}`],
+    //     (err, res) => {
+    //       if (err) throw err;
+    //         res.forEach(({ id }) => {
+    //           managerID = id;
+    //         });
+    //       }
+    //     );
+    // };
+    // findManagerID();
+
+    // let query = 'INSERT INTO employees SET ?';
+    // connection.query(query,
+    //   {
+    //     first_name: answers.first_name,
+    //     last_name: answers.last_name,
+    //     role_id: roleID,
+    //     manager_id: managerID
+    //   },
+    //   (err, res) => {
+    //     if (err) throw err;
+    //     console.log(`${answer.first_name} ${answer.last_name} was successfully added. \n`);
+    //     startPrompts();
+    //   }
+    // );
     // connection.end;
   })
 };
 
-const addRole = async() => {
-  return await inquirer
+const addRole = () => {
+  return inquirer
   .prompt([
     {
       name: 'title',  
@@ -218,8 +249,9 @@ const addRole = async() => {
   ])
   .then((answers) => {
     let departmentID = departmentArr().indexOf(val.department) +1
-    let query = 'INSERT INTO role SET ?'
-    connection.query(query,
+    let query = 
+    connection.query(
+      'INSERT INTO role SET ?',
       {
         title: answers.title,
         salary: answers.salary,
@@ -235,8 +267,8 @@ const addRole = async() => {
   })
 };
 
-const addDepartment = async() => {
-  return await inquirer
+const addDepartment = () => {
+  return inquirer
     .prompt([
     {
       name: 'departmentName',  
@@ -308,8 +340,8 @@ const viewDepartments = () => {
 }
 
 // UPDATE 
-const updateEmployeeRole = async () => {
-  return await inquirer
+const updateEmployeeRole = () => {
+  return inquirer
     .prompt([
       {
         name: 'employee',  
