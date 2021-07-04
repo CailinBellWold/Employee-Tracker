@@ -15,7 +15,7 @@ const { connect } = require('./config/connection');
 // Arrays
 const employeeArr = () => {
   const employees = [];
-  connection.query('SELECT employee.id, CONCAT(employee.first_name," ", employee.last_name) AS Employee FROM employee ORDER BY Employee ASC', function(err, res) {
+  connection.query('SELECT CONCAT_WS(" ", employee.first_name, employee.last_name) AS Employee FROM employee ORDER BY Employee ASC', function(err, res) {
     if (err) throw err;
     res.forEach(({ Employee }) => employees.push(Employee));
   })
@@ -179,7 +179,7 @@ const addEmployee = async() => {
     let managerName = answers.manager;
     let managerID;
     const findManagerID = () => {
-      connection.query('SELECT employee.id, CONCAT(employee.first_name," ", employee.last_name) AS Employee FROM employee where Employee=?'
+      connection.query('SELECT employee.id, CONCAT_WS(" ", employee.first_name, employee.last_name) AS Employee FROM employee HAVING Employee=?',
         [`${managerName}`],
         (err, res) => {
           if (err) throw err;
