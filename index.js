@@ -15,9 +15,9 @@ const { connect } = require('./config/connection');
 // Arrays
 const employeeArr = () => {
   const employees = [];
-  connection.query('SELECT * from employee', function(err, res) {
+  connection.query('SELECT employee.id, CONCAT(employee.first_name," ", employee.last_name) AS Employee FROM employee ORDER BY Employee ASC', function(err, res) {
     if (err) throw err;
-    res.forEach(({ id }) => employees.push(first_name + last_name));
+    res.forEach(({ Employee }) => employees.push(Employee));
   })
   return employees;
 };
@@ -33,7 +33,7 @@ const roleArr = () => {
 
 const departmentArr = () => {
   const departments = [];
-  connection.query('SELECT * from department', function(err, res) {
+  connection.query('SELECT * FROM department', function(err, res) {
     if (err) throw err;
     res.forEach(({ department_name }) => departments.push(department_name));
   })
@@ -153,19 +153,18 @@ const addEmployee = async() => {
       message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s ROLE by scrolling through the menu below.`,
       choices: roleArr()
     },
-    // {
-    //   name: 'manager',  
-    //   type: 'list',
-    //   message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s MANAGER by scrolling through the menu below.`,
-    //   choices: employeeArr()
-    // },
+    {
+      name: 'manager',  
+      type: 'list',
+      message: ({ first_name, last_name }) => `Input ${first_name + ' ' + last_name}\'s MANAGER by scrolling through the menu below.`,
+      choices: employeeArr()
+    },
   ])
   .then((answers) => {
     let roleTitle = answers.role;
     let roleID;
     const findRoleID = () => {
-      const query = connection.query(
-        'SELECT * FROM role WHERE title=?',
+      connection.query('SELECT * FROM role WHERE title=?',
         [`${roleTitle}`],
         (err, res) => {
           if (err) throw err;
@@ -175,23 +174,33 @@ const addEmployee = async() => {
         }
       );
     };
-      findRoleID();
+    findRoleID();
 
-    // let managerName = answers.manager;
-    // let managerID;
-    // const findManagerID = () => {
-    //   const query = connection.query(
-    //     'SELECT * FROM employee WHERE first_name=? & last_name=?',
-    //     [`${managerName}`],
-    //     (err, res) => {
-    //       if (err) throw err;
-    //         res.forEach(({ id }) => {
-    //           managerID = id;
-    //         });
-    //       }
-    //     );
-    // };
-    // findManagerID();
+    let managerName = answers.manager;
+    let managerID;
+    const findManagerID = () => {
+      connection.query('SELECT employee.id, CONCAT(employee.first_name," ", employee.last_name) AS Employee FROM employee where Employee=?'
+        [`${managerName}`],
+        (err, res) => {
+          if (err) throw err;
+            res.forEach(({ id }) => {
+              managerID = id;
+            });
+          }
+        );
+    };
+    findManagerID();
+
+// .then((answer) => {
+//   // get the information of the chosen item
+//   let chosenItem;
+//   results.forEach((item) => {
+//     if (item.item_name === answer.choice) {
+//       chosenItem = item;
+//     }
+//   });
+
+
 
     // let query = 'INSERT INTO employees SET ?';
     // connection.query(query,
@@ -303,10 +312,10 @@ const addDepartment = () => {
 // READ (View)
 function viewEmployees() {
   let query = `SELECT employee.first_name, employee.last_name, role.title, role.salary, department.department_name `;
-  query += `CONCAT (e.first_name, ' ', e.last_name) AS Manager `
-  query += `FROM employee `
+  query += `CONCAT (e.first_name, ' ', e.last_name) AS Manager `;
+  query += `FROM employee `;
   query += `INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id `;
-  query += `LEFT JOIN employee e ON employee.manager_id = e.id `
+  query += `LEFT JOIN employee e ON employee.manager_id = e.id `;
   query += `ORDER BY last_name ASC`;
   connection.query(query, (err, res) => {
     if (err) throw err;
