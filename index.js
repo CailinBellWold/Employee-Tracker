@@ -1,4 +1,4 @@
-// TO DO: When adding an employee, roll_ID and manager_ID are returning as NULL, though they pull in mySQL workbench..
+// TO DO: Get the connection query to run asynchronously after receiving the information it needs from the inquirer and subsequent functions.
 // Validate Employees, Roles and Departments against existing.
 // Validate salary as a number
 
@@ -168,9 +168,8 @@ const addEmployee = async() => {
         [`${roleTitle}`],
         (err, res) => {
           if (err) throw err;
-          res.forEach(({ id }) => {
-            roleID = id;
-          });
+          roleID = res[0].id;
+          console.log("roleID", roleID);
         }
       );
     };
@@ -183,30 +182,35 @@ const addEmployee = async() => {
         [`${managerName}`],
         (err, res) => {
           if (err) throw err;
-            res.forEach(({ id }) => {
-              managerID = id;
-            });
-          }
-        );
+          managerID = res[0].id;
+          console.log("managerID", managerID);
+        }
+      );
     };
     findManagerID();
 
-    let query = 'INSERT INTO employee SET ?';
-    connection.query(query,
-      {
-        first_name: answers.first_name,
-        last_name: answers.last_name,
-        role_id: roleID,
-        manager_id: managerID
-      },
-      (err, res) => {
-        if (err) throw err;
-        console.log(`${answers.first_name} ${answers.last_name} was successfully added. \n`);
-        startPrompts();
-      }
-    );
-    connection.end;
-  })
+    console.log("ROLE-ID Added before insert query", roleID);
+    console.log("MANAGER-ID Added before insert query", managerID);
+
+    const insertNewEmployee = async () => { 
+      connection.query('INSERT INTO employee SET ?',
+        {
+          first_name: answers.first_name,
+          last_name: answers.last_name,
+          role_id: roleID,
+          manager_id: managerID
+        },
+        (err, res) => {
+          if (err) throw err;
+          console.log("INSERT RES", res);
+          console.log(`${answers.first_name} ${answers.last_name} was successfully added. \n`);
+          startPrompts();
+        }
+      );
+      // connection.end;
+    }
+    insertNewEmployee();
+  });
 };
 
 const addRole = () => {
@@ -247,9 +251,7 @@ const addRole = () => {
   ])
   .then((answers) => {
     let departmentID = departmentArr().indexOf(val.department) +1
-    let query = 
-    connection.query(
-      'INSERT INTO role SET ?',
+    connection.query('INSERT INTO role SET ?',
       {
         title: answers.title,
         salary: answers.salary,
