@@ -1,4 +1,4 @@
-// TO DO: Figure out how to push to the screen the employee/role basic info, but return into the variable the ID for those items.
+// TO DO: When adding an employee, roll_ID and manager_ID are returning as NULL, though they pull in mySQL workbench..
 // Validate Employees, Roles and Departments against existing.
 // Validate salary as a number
 
@@ -191,32 +191,21 @@ const addEmployee = async() => {
     };
     findManagerID();
 
-// .then((answer) => {
-//   // get the information of the chosen item
-//   let chosenItem;
-//   results.forEach((item) => {
-//     if (item.item_name === answer.choice) {
-//       chosenItem = item;
-//     }
-//   });
-
-
-
-    // let query = 'INSERT INTO employees SET ?';
-    // connection.query(query,
-    //   {
-    //     first_name: answers.first_name,
-    //     last_name: answers.last_name,
-    //     role_id: roleID,
-    //     manager_id: managerID
-    //   },
-    //   (err, res) => {
-    //     if (err) throw err;
-    //     console.log(`${answer.first_name} ${answer.last_name} was successfully added. \n`);
-    //     startPrompts();
-    //   }
-    // );
-    // connection.end;
+    let query = 'INSERT INTO employee SET ?';
+    connection.query(query,
+      {
+        first_name: answers.first_name,
+        last_name: answers.last_name,
+        role_id: roleID,
+        manager_id: managerID
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${answers.first_name} ${answers.last_name} was successfully added. \n`);
+        startPrompts();
+      }
+    );
+    connection.end;
   })
 };
 
