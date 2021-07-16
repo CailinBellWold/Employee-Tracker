@@ -119,7 +119,7 @@ const startPrompts = async () => {
 
 // CREATE (Add)
 const addEmployee = async() => {
-  return await inquirer
+  const employee = await inquirer
   .prompt([
     {
       name: 'first_name',  
@@ -193,7 +193,7 @@ const addEmployee = async() => {
     console.log("MANAGER-ID Added before insert query", managerID);
 
     const insertNewEmployee = async () => { 
-      connection.query('INSERT INTO employee SET ?',
+      const mySQLConnection = await connection.query('INSERT INTO employee SET ?',
         {
           first_name: answers.first_name,
           last_name: answers.last_name,
